@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) void {
     // to our consumers. We must give it a name because a Zig package can expose
     // multiple modules and consumers will need to be able to specify which
     // module they want to access.
-    const mod = b.addModule("ZigWM", .{
+const mod = b.addModule("ZigWM", .{
         // The root source file is the "entry point" of this module. Users of
         // this module will only be able to access public declarations contained
         // in this file, which means that if you have declarations that you
@@ -41,6 +41,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
 
+    
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
     // to the module defined above, it's sometimes preferable to split business
@@ -63,7 +64,7 @@ pub fn build(b: *std.Build) void {
             // b.createModule defines a new module just like b.addModule but,
             // unlike b.addModule, it does not expose the module to consumers of
             // this package, which is why in this case we don't have to give it a name.
-            .root_source_file = b.path("src/main.zig"),
+            .root_source_file = b.path("src/zwm.zig"),
             // Target and optimization levels must be explicitly wired in when
             // defining an executable or library (in the root module), and you
             // can also hardcode a specific target for an executable or library
@@ -82,6 +83,16 @@ pub fn build(b: *std.Build) void {
             },
         }),
     });
+
+    exe.linkSystemLibrary("X11");
+    exe.root_module.addIncludePath(.{.src_path=
+                                   .{
+                                        .owner=b,
+                                        .sub_path="/usr/include/X11/",
+                                    }
+                        });
+   
+    exe.linkLibC();
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
